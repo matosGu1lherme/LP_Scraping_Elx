@@ -1,30 +1,27 @@
 defmodule Scrap do
-  @moduledoc """
-  Documentation for `Scrap`.
-  """
 
-  @doc """
-  Hello world.
+  def pegar_tokens do
 
-  ## Examples
+  end
 
-      iex> Scrap.hello()
-      :world
-
-  """
   def get_page do
 
-    case HTTPoison.get("https://mangalivre.net/") do
+    case HTTPoison.get("https://mangalivre.net/lista-de-mangas/ordenar-por-numero-de-leituras/todos/desde-o-comeco") do
       {:ok, %HTTPoison.Response{body: body}} ->
-        document = Floki.parse(body)
-        content = document
-        elem = Floki.find(content, "div#populares-semana")
-        ancoras = Floki.find(elem, "a")
+        document = Floki.parse_document(body)
+        content = body
+        elem = Floki.find(body, "div.seriesList")
+        list = Floki.find(elem, "li")
+        title = Floki.find(list, "span.series-title")
+        header = Floki.find(title, "h1")
 
-        IO.puts(ancoras)
+
+        text = Floki.raw_html(header)
 
 
-      #IO.inspect(content)
+
+        IO.inspect(text)
+
 
     end
   end
