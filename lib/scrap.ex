@@ -5,6 +5,8 @@ defmodule Scrap do
 
     [head | tail] = string
 
+    if head == nil, do: nil
+
     manga_link = "https://mangalivre.net" <> head
 
     case HTTPoison.get(manga_link) do
@@ -12,25 +14,31 @@ defmodule Scrap do
         content = body
         head = Floki.find(content, "head")
         tile_element = Floki.find(head ,"title")
-        title = Floki.text(tile_element)
+        title_raw = Floki.text(tile_element)
 
-        IO.puts("\n")
+        [title | _trash] = (String.split(title_raw, "(pt-BR)"))
+
         string_title = "##{rank}: #{title}"
-        IO.inspect(string_title)
 
         desc_element = Floki.find(head, "meta[name='description']")
         desc = Floki.attribute(desc_element, "content")
         descricao = Floki.text(desc)
         string_desc = "Descricao: #{descricao}"
-        IO.inspect(string_desc)
 
-        body = Floki.find(content, "div.series-info")
-        span = Floki.find(body, "span.series-author")
-
+        series_info = Floki.find(content, "div.series-info")
+        span = Floki.find(series_info, "span.series-author")
         dado = Enum.at(span, 1)
-        list_span = Tuple.to_list(dado)
-        IO.inspect(Enum.at(list_span, 2))
+        author_raw = String.trim(Enum.at(String.split(Floki.text(dado), "\n"), 1))
 
+        score_div = Floki.find(body, "div.score-number")
+        score = String.trim(Enum.at(String.split(Floki.text(score_div), "\n"), 1))
+
+
+        IO.puts("\n")
+        IO.inspect(string_title)
+        IO.inspect(string_desc)
+        IO.inspect("Author: #{author_raw}")
+        IO.inspect("Nota: #{score}")
         IO.puts("\n")
 
 
