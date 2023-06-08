@@ -1,11 +1,16 @@
 defmodule Scrap do
 
 
+
   def pegar_tokens(string, rank \\ 1) do
+
+
+    if !string do
+      IO.puts("FIM DA RECURSAO")
+    end
 
     [head | tail] = string
 
-    if head == nil, do: nil
 
     manga_link = "https://mangalivre.net" <> head
 
@@ -28,7 +33,7 @@ defmodule Scrap do
         series_info = Floki.find(content, "div.series-info")
         span = Floki.find(series_info, "span.series-author")
         dado = Enum.at(span, 1)
-        author_raw = String.trim(Enum.at(String.split(Floki.text(dado), "\n"), 1))
+        author_raw = String.trim(String.replace(Floki.text(dado), "\n", ""))
 
         score_div = Floki.find(body, "div.score-number")
         score = String.trim(Enum.at(String.split(Floki.text(score_div), "\n"), 1))
@@ -41,11 +46,11 @@ defmodule Scrap do
         IO.inspect("Nota: #{score}")
         IO.puts("\n")
 
-
+      pegar_tokens(tail, (rank + 1))
     end
 
 
-  end
+end
 
   def get_page do
 
