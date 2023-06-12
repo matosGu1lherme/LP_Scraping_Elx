@@ -68,44 +68,93 @@ defmodule Scrap do
   end
 
   # Mangaschan
-  def get_mangac(limit) do
-    get_mangac_recursive("https://mangaschan.com", limit)
-  end
-  
-  defp get_mangac_recursive(_, 0), do: []
-  
-  defp get_mangac_recursive(url, limit) do
-    case HTTPoison.get(url) do
+  def get_mangac do
+    case HTTPoison.get("https://mangaschan.com") do
       {:ok, %HTTPoison.Response{body: body}} ->
-        body
+        content = body
           |> Floki.find("div.listupd a")
-          |> Enum.take(limit)
           |> Enum.map(fn link ->
             href = Floki.attribute(link, "href")
             get_link_details(href)
           end)
     end
   end
-  
+
   def get_link_details(url) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
-        titulo = body
-          |> Floki.find("div.main-info h1.entry-title")
-          |> Floki.text()
-          |> String.trim()
-  
-        sinopse = body
-          |> Floki.find("div.entry-content.entry-content-single p")
-          |> Floki.text()
-          |> String.trim()
+      titulo = body
+        |> Floki.find("div.main-info h1.entry-title")
+        |> Floki.text()
+        |> String.trim()
 
-        IO.puts("\n")
-        IO.puts("Nome: #{titulo}")
-        IO.puts("Sinopse: #{sinopse}")
-        IO.puts("\n")
+      sinopse = body
+        |> Floki.find("div.entry-content.entry-content-single p")
+        |> Floki.text()
+        |> String.trim()
+
+      IO.puts("Nome: #{titulo}")
+      IO.puts("Sinopse: #{sinopse}")
     end
   end
+
+  #LerManga
+  def get_ler_manga do
+    IO.puts("Executando...")
+
+    reiniciar_arquivo("Em_alta.txt")
+
+    case HTTPoison.get("https://lermanga.org/") do
+      {:ok, %HTTPoison.Response{body: body}} ->
+        IO.puts ("Procurando os titulos...")
+        content = body
+        titles = Floki.find(content, "div.sidebarhome h3.film-name a")
+                  |> Enum.map(&Floki.text/1)
+        IO.puts ("Procurando os links...")
+        IO.puts ("Recuperando as sinopses...")
+        Enum.each(titles, &print_manga_info/1)
+    end
+
+    IO.puts("Scrap finalizado, cheque o arquivo: \"Em_alta.txt\"")
+  end
+
+  defp reiniciar_arquivo(arquivo) do
+    IO.puts ("Reiniciando o arquivo de saida...")
+    case File.rm(arquivo) do
+      :ok -> IO.puts ("Arquivo reinicializado com sucesso!")
+      {:error, :enoent} -> :ok  # Caso o arquivo não exista, ele já está reiniciado.
+      {:error, erro} -> raise "Arquivo não deletado!: #{erro}"
+    end
+  end
+
+  defp print_manga_info(title) do
+    title_str = "Titulo: #{title}"
+    escrever_arquivo(title_str)
+
+    link = "https://lermanga.org/mangas/#{String.replace(title, " ", "-")}/"
+    link_str = "Link: #{link}"
+    escrever_arquivo(link_str)
+
+    case HTTPoison.get(link) do
+      {:ok, %HTTPoison.Response{body: body}} ->
+        content2 = body
+        synopses = Floki.find(content2, "div.boxAnimeSobreLast p")
+                   |> Enum.map(&Floki.text/1)
+
+        Enum.each(synopses, &print_sinopse/1)
+    end
+  end
+
+  defp print_sinopse(sinopse) do
+    sinopse_str = "sinopse: #{sinopse}"
+    escrever_arquivo(sinopse_str)
+  end
+
+  defp escrever_arquivo(content) do
+    File.write("Em_alta.txt", content <> "\n", [:append])
+  end
+end
+
 
   def main do
 
@@ -121,7 +170,12 @@ defmodule Scrap do
 
     if input == "MangaChan" do
       IO.puts("\n Realizando pesquisa em #{input}...\n")
-      get_mangac(5)
+      get_mangac()
+    end
+
+        if input == "LerManga" do
+      IO.puts("\n Realizando pesquisa em #{input}...\n")
+      get_ler_manga()
     end
 
   end
