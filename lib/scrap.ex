@@ -31,7 +31,7 @@ defmodule Scrap do
             series_info = Floki.find(content, "div.series-info")
             span = Floki.find(series_info, "span.series-author")
             dado = Enum.at(span, 1)
-            author_raw = String.trim(String.replace(Floki.text(dado), "\n", ""))
+            author_raw = String.trim(String.replace(String.replace(Floki.text(dado), "\n", ""), "Completo", ""))
 
             score_div = Floki.find(body, "div.score-number")
             score = String.trim(Enum.at(String.split(Floki.text(score_div), "\n"), 1))
@@ -49,10 +49,7 @@ defmodule Scrap do
 
         pegar_tokens(tail, (rank + 1))
     end
-
-
-
-end
+  end
 
   def get_page do
 
@@ -66,8 +63,33 @@ end
 
 
         pegar_tokens(links)
-        IO.puts("CHAMADA FINAL")
 
     end
   end
+
+  def main do
+
+    IO.puts("Mangaás Mais Populares do Momento \n Qual site deseja usar como Referencia? \n - MangaLivre\n - MangaChan\n - LerMangas \n")
+
+    input = IO.gets("Entre com nome:") |> String.trim()
+
+    IO.puts("\n Realizando pesquisa em #{input}...\n")
+
+    case input == "MangaLivre" do
+      true ->
+        get_page()
+    end
+
+    case input == "MangaChan" do
+      true ->
+        get_page()
+    end
+
+    case input == "LerManga" do
+      true ->
+        get_page()
+    end
+  end
+
+
 end
