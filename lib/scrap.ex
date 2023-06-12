@@ -67,6 +67,36 @@ defmodule Scrap do
     end
   end
 
+  # Mangaschan
+  def get_mangac do
+    case HTTPoison.get("https://mangaschan.com") do
+      {:ok, %HTTPoison.Response{body: body}} ->
+        content = body
+          |> Floki.find("div.listupd a")
+          |> Enum.map(fn link ->
+            href = Floki.attribute(link, "href")
+            get_link_details(href)
+          end)
+    end
+  end
+  def get_link_details(url) do
+    case HTTPoison.get(url) do
+      {:ok, %HTTPoison.Response{body: body}} ->
+      titulo = body
+        |> Floki.find("div.main-info h1.entry-title")
+        |> Floki.text()
+        |> String.trim()
+      
+      sinopse = body
+        |> Floki.find("div.entry-content.entry-content-single p")
+        |> Floki.text()
+        |> String.trim()
+
+      IO.puts("Nome: #{titulo}")
+      IO.puts("Sinopse: #{sinopse}")
+    end
+  end
+
   def main do
 
     IO.puts("Mangaás Mais Populares do Momento \n Qual site deseja usar como Referencia? \n - MangaLivre\n - MangaChan\n - LerMangas \n")
@@ -82,7 +112,7 @@ defmodule Scrap do
 
     case input == "MangaChan" do
       true ->
-        get_page()
+        get_mangac()
     end
 
     case input == "LerManga" do
