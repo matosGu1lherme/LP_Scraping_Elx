@@ -79,6 +79,7 @@ defmodule Scrap do
           end)
     end
   end
+
   def get_link_details(url) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
@@ -86,7 +87,7 @@ defmodule Scrap do
         |> Floki.find("div.main-info h1.entry-title")
         |> Floki.text()
         |> String.trim()
-      
+
       sinopse = body
         |> Floki.find("div.entry-content.entry-content-single p")
         |> Floki.text()
@@ -103,23 +104,16 @@ defmodule Scrap do
 
     input = IO.gets("Entre com nome:") |> String.trim()
 
-    IO.puts("\n Realizando pesquisa em #{input}...\n")
 
-    case input == "MangaLivre" do
-      true ->
-        get_page()
+    if input == "MangaLivre" do
+      IO.puts("\n Realizando pesquisa em #{input}...\n")
+      get_page()
     end
 
-    case input == "MangaChan" do
-      true ->
-        get_mangac()
+    if input == "MangaChan" do
+      IO.puts("\n Realizando pesquisa em #{input}...\n")
+      get_mangac()
     end
 
-    case input == "LerManga" do
-      true ->
-        get_page()
-    end
   end
-
-
 end
