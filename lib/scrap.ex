@@ -68,33 +68,42 @@ defmodule Scrap do
   end
 
   # Mangaschan
-  def get_mangac do
-    case HTTPoison.get("https://mangaschan.com") do
+  def get_mangac(limit) do
+    get_mangac_recursive("https://mangaschan.com", limit)
+  end
+  
+  defp get_mangac_recursive(_, 0), do: []
+  
+  defp get_mangac_recursive(url, limit) do
+    case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
-        content = body
+        body
           |> Floki.find("div.listupd a")
+          |> Enum.take(limit)
           |> Enum.map(fn link ->
             href = Floki.attribute(link, "href")
             get_link_details(href)
           end)
     end
   end
-
+  
   def get_link_details(url) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
-      titulo = body
-        |> Floki.find("div.main-info h1.entry-title")
-        |> Floki.text()
-        |> String.trim()
+        titulo = body
+          |> Floki.find("div.main-info h1.entry-title")
+          |> Floki.text()
+          |> String.trim()
+  
+        sinopse = body
+          |> Floki.find("div.entry-content.entry-content-single p")
+          |> Floki.text()
+          |> String.trim()
 
-      sinopse = body
-        |> Floki.find("div.entry-content.entry-content-single p")
-        |> Floki.text()
-        |> String.trim()
-
-      IO.puts("Nome: #{titulo}")
-      IO.puts("Sinopse: #{sinopse}")
+        IO.puts("\n")
+        IO.puts("Nome: #{titulo}")
+        IO.puts("Sinopse: #{sinopse}")
+        IO.puts("\n")
     end
   end
 
@@ -112,7 +121,7 @@ defmodule Scrap do
 
     if input == "MangaChan" do
       IO.puts("\n Realizando pesquisa em #{input}...\n")
-      get_mangac()
+      get_mangac(5)
     end
 
   end
