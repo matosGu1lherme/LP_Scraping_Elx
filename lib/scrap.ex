@@ -68,11 +68,18 @@ defmodule Scrap do
   end
 
   # Mangaschan
-  def get_mangac do
-    case HTTPoison.get("https://mangaschan.com") do
+  def get_mangac(limit) do
+    get_mangac_recursive("https://mangaschan.com", limit)
+  end
+
+  defp get_mangac_recursive(_, 0), do: []
+
+  defp get_mangac_recursive(url, limit) do
+    case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
-        content = body
+        body
           |> Floki.find("div.listupd a")
+          |> Enum.take(limit)
           |> Enum.map(fn link ->
             href = Floki.attribute(link, "href")
             get_link_details(href)
@@ -83,23 +90,25 @@ defmodule Scrap do
   def get_link_details(url) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
-      titulo = body
-        |> Floki.find("div.main-info h1.entry-title")
-        |> Floki.text()
-        |> String.trim()
+        titulo = body
+          |> Floki.find("div.main-info h1.entry-title")
+          |> Floki.text()
+          |> String.trim()
 
-      sinopse = body
-        |> Floki.find("div.entry-content.entry-content-single p")
-        |> Floki.text()
-        |> String.trim()
+        sinopse = body
+          |> Floki.find("div.entry-content.entry-content-single p")
+          |> Floki.text()
+          |> String.trim()
 
-      IO.puts("Nome: #{titulo}")
-      IO.puts("Sinopse: #{sinopse}")
+        IO.puts("\n")
+        IO.puts("Nome: #{titulo}")
+        IO.puts("Sinopse: #{sinopse}")
+        IO.puts("\n")
     end
   end
 
-  #LerManga
-  def get_ler_manga do
+  #MangaLivre
+  def get_manga do
     IO.puts("Executando...")
 
     reiniciar_arquivo("Em_alta.txt")
@@ -148,12 +157,12 @@ defmodule Scrap do
   defp print_sinopse(sinopse) do
     sinopse_str = "sinopse: #{sinopse}"
     escrever_arquivo(sinopse_str)
+    escrever_arquivo("\n")
   end
 
   defp escrever_arquivo(content) do
     File.write("Em_alta.txt", content <> "\n", [:append])
   end
-end
 
 
   def main do
@@ -170,12 +179,12 @@ end
 
     if input == "MangaChan" do
       IO.puts("\n Realizando pesquisa em #{input}...\n")
-      get_mangac()
+      get_mangac(5)
     end
 
-        if input == "LerManga" do
+    if input == "LerMangas" do
       IO.puts("\n Realizando pesquisa em #{input}...\n")
-      get_ler_manga()
+      get_manga()
     end
 
   end
