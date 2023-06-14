@@ -1,4 +1,21 @@
 # Implementação do Trabalho de Linguagens de Programação
+
+## Sobre o Programa
+
+O programa é feito em Elixir, e realiza uma varredura em três sites de mangás, para
+conseguir a lista de mangas mais lidos do momento, os sites escolhidos são MangaLivre,
+MangaChan, LerManga
+
+- **Para executar o programa**
+
+1. Instalar o Elixir
+2. executar o comando "mix deps.get" dentro da pasta LP_SCRAPING_ELX
+3. Rodar o Comando "iex -S mix"
+4. Dentro do terminal iterativo do iex, executar o comando "Scrap.main", que ira iniciar o função principal
+5. Escolher um dos tres sites de manga e digitar como aparece no terminal seu nome
+  - sites MangaLivre e MangaChan devolvem as saidas no Terminal
+  - Site LerMangas retorna os dados em um arquivo "Em_alta.txt", que é criado ao executar a função.
+
 ## WebScraping em Sites de Manga
 
 O trabalho requerido pelo professor Rodrigo Hubner tinha como objetivo a realização de um trabalho que realizasse WebScraping, ou seja, a busca de dados em páginas web por meio de requisições HTTP e técnicas de filtragem de dados. No entanto, o trabalho necessitava ser realizado por meio de linguagens funcionais.
